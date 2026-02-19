@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Rushi Store</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f3f3f3;
+        }
+
+        /* Navbar */
+        .navbar {
+            background-color: #131921;
+            color: white;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .navbar h1 {
+            margin: 0;
+            font-size: 22px;
+        }
+
+        .cart-info {
+            font-size: 18px;
+        }
+
+        /* Product Grid */
+        .container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 20px;
+            padding: 30px;
+        }
+
+        .product-card {
+            background-color: white;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0px 2px 8px rgba(0,0,0,0.1);
+            text-align: center;
+            transition: 0.3s;
+        }
+
+        .product-card:hover {
+            transform: scale(1.05);
+        }
+
+        .product-card img {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+            border-radius: 5px;
+        }
+
+        .product-card h3 {
+            margin: 10px 0;
+        }
+
+        .price {
+            color: green;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        button {
+            background-color: #febd69;
+            border: none;
+            padding: 8px 12px;
+            cursor: pointer;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+
+        button:hover {
+            background-color: #f3a847;
+        }
+
+        /* Cart Section */
+        .cart-section {
+            background-color: white;
+            margin: 20px 30px;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0px 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .cart-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+
+        .remove-btn {
+            background-color: red;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+
+    </style>
+</head>
+<body>
+
+	<div class="navbar">
+	    <h1>🛒 Rushi Store</h1>
+	    <div class="cart-info">
+	        Cart: <span id="cartCount">0</span>
+	        <input type="text" id="searchBox" placeholder="Search products..." 
+	               style="padding:6px 10px; border-radius:5px; border:none; width:200px; margin-left:20px;">
+	    </div>
+	</div>
+
+
+<div class="container" id="productContainer"></div>
+
+<div class="cart-section">
+    <h2>Your Cart</h2>
+    <div id="cartItems"></div>
+    <h3>Total: ₹ <span id="totalPrice">0</span></h3>
+</div>
+
+<script>
+    let cart = [];
+
+    // Fetch products from backend
+    fetch("/api/products")
+        .then(response => response.json())
+        .then(data => {
+            const container = document.getElementById("productContainer");
+
+            data.forEach(product => {
+                container.innerHTML += `
+                    <div class="product-card">
+                        <img src="${product.imageUrl}" alt="${product.name}">
+                        <h3>${product.name}</h3>
+                        <p>${product.description}</p>
+                        <div class="price">₹ ${product.price}</div>
+                        <button onclick='addToCart(${JSON.stringify(product)})'>
+                            Add to Cart
+                        </button>
+                    </div>
+                `;
+            });
+        });
+
+    // Add product to cart
+    function addToCart(product) {
+        cart.push(product);
+        updateCart();
+    }
+
+    // Remove product from cart
+    function removeFromCart(index) {
+        cart.splice(index, 1);
+        updateCart();
+    }
+
+    // Update cart UI
+    function updateCart() {
+        document.getElementById("cartCount").innerText = cart.length;
+
+        const cartItems = document.getElementById("cartItems");
+        cartItems.innerHTML = "";
+
+        let total = 0;
+
+        cart.forEach((item, index) => {
+            total += item.price;
+
+            cartItems.innerHTML += `
+                <div class="cart-item">
+                    ${item.name} - ₹ ${item.price}
+                    <button class="remove-btn" onclick="removeFromCart(${index})">
+                        Remove
+                    </button>
+                </div>
+            `;
+        });
+
+        document.getElementById("totalPrice").innerText = total;
+    }
+</script>
+
+</body>
+</html>
